@@ -6,3 +6,4 @@ commit 005 : turn project into a package
 commit 006 : intro of flask_login
 commit 007 : route profil
 commit 007a : fixed bootstrap version
+commit 008 : added avatar handling (update). reisze and crop img

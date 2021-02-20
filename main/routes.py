@@ -1,9 +1,11 @@
+import secrets,os
 from flask import render_template, url_for,redirect,flash,request
 from flask_login.utils import logout_user
 from main.forms import *
 from main.models import *
 from main import app, bcrypt, db
 from flask_login import login_user,current_user,login_required
+from PIL import Image
 
 posts=[{
     "date":"14/02/2021",
@@ -70,11 +72,42 @@ def logout():
     flash('Successfully logout. See you!','success')
     return redirect(url_for('home'))
 
+def save_picture(form_picture):
+    random_hex=secrets.token_hex(8)
+    _,f_ext=os.path.splitext(form_picture.filename)
+    picture_fn=random_hex+f_ext
+    picture_path=os.path.join(app.root_path,'static/avatars',picture_fn)
+    
+    i= Image.open(form_picture)
+    #crop if not cube
+    width,height=i.size
+    if width!=height:
+        if width<height:
+            new = width  
+        else :
+            new=height
+        left = (width - new)/2
+        top = (height - new)/2
+        right = (width + new)/2
+        bottom = (height + new)/2
+        i=i.crop((left,top,right,bottom))
+
+    #resize
+    output_size=(125,125)
+    i.thumbnail(output_size)
+
+    i.save(picture_path)
+    return picture_fn
+
 @app.route("/profil/",methods=["GET","POST"])
 @login_required
 def profil():
     form = UpdateAccountForm()
     if form.validate_on_submit():
+        if form.picture.data:
+            picture_file=save_picture(form.picture.data)
+            current_user.avatar_file = picture_file
+           
         current_user.username=form.username.data
         current_user.email=form.email.data
         db.session.commit()
