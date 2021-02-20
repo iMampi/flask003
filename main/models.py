@@ -1,7 +1,13 @@
-from main import db
+from flask_login import UserMixin
+from main import db,login_manager
 import datetime as dt
 
-class User(db.Model):
+#must be created. we tell login manager how to get user from our db
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+class User(db.Model, UserMixin):
     __tablename__='user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20),unique=True,nullable=False)
@@ -12,6 +18,8 @@ class User(db.Model):
 
     def __repr__():
         return f"User('{self.username}','{self.email}','{self.avatar_file}')"
+
+
 
 class Post(db.Model):
     __tablename__='post'
