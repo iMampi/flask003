@@ -4,3 +4,4 @@ commit 003 : intro of wtf, loginform and registrationform
 commit 004 : intro of sqlalchemy, created 2 users
 commit 005 : turn project into a package
 commit 006 : intro of flask_login
+commit 007 : route profil

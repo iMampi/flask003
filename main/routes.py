@@ -52,6 +52,8 @@ def login():
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user,remember=form.remember.data)
             next_page = request.args.get('next')
+            flash('Welcome back!','success')
+
             if next_page:
                 return redirect(next_page)
             else:
@@ -68,9 +70,22 @@ def logout():
     flash('Successfully logout. See you!','success')
     return redirect(url_for('home'))
 
-@app.route("/profil/")
+@app.route("/profil/",methods=["GET","POST"])
 @login_required
 def profil():
-    return render_template("profil.html",title="Profil")
+    form = UpdateAccountForm()
+    if form.validate_on_submit():
+        current_user.username=form.username.data
+        current_user.email=form.email.data
+        db.session.commit()
+        flash ('Your account has been updated','success')
+        return redirect(url_for('profil'))
+    elif request.method=='GET':
+        form.username.data= current_user.username
+        form.email.data=current_user.email
+    image_file = url_for('static',
+        filename='avatars/'+current_user.avatar_file)
+    return render_template("profil.html",
+        title="Profil",avatar=image_file,form=form)
    
 
