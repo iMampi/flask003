@@ -1,5 +1,5 @@
 import secrets,os
-from flask import render_template, url_for,redirect,flash,request
+from flask import render_template, url_for,redirect,flash,request, abort
 from flask_login.utils import logout_user
 from main.forms import *
 from main.models import *
@@ -132,5 +132,42 @@ def new_post():
         db.session.commit()
         flash('Posted.', "success")
         return redirect(url_for('home'))
-    return render_template('new_post.html', title="New post",form=form)
+    return render_template('new_post.html', 
+        title="New post",form=form,legend="New post")
+
+@app.route("/post/<int:post_id>")
+def post(post_id):
+    post=Post.query.get_or_404(post_id)
+    return render_template('post.html', title=post.title,post=post)
+
+@app.route("/post/<int:post_id>/update", methods=["GET","POST"])
+@login_required
+def post_update(post_id):
+    post=Post.query.get_or_404(post_id)
+    if post.author != current_user:
+        abort(403)
+    form = PostForm()
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.post = form.content.data
+        flash('Post updated','success')
+        return redirect(url_for('post',post_id=post.id))
+    elif request.method=='GET':
+        form.title.data=post.title
+        form.content.data=post.post
+    return render_template('new_post.html',
+        title="Update post",form=form,legend="Update post")
+
+@app.route("/post/<int:post_id>/delete", methods=["POST"])
+@login_required
+def post_delete(post_id):
+    post=Post.query.get_or_404(post_id)
+    if post.author != current_user:
+        abort(403)
+    db.session.delete(post)
+    db.session.commit()
+    flash('Post deleted.', 'success')
+    return redirect(url_for('home'))
+
+
 
