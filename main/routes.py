@@ -6,7 +6,7 @@ from main.models import *
 from main import app, bcrypt, db
 from flask_login import login_user,current_user,login_required
 from PIL import Image
-
+"""
 posts=[{
     "date":"14/02/2021",
     "author":"iMampi",
@@ -20,10 +20,11 @@ posts=[{
 
     }
 ]
-
+"""
 @app.route("/")
 @app.route("/home/")
 def home():
+    posts=Post.query.all()
     return render_template('home.html',posts=posts)
 
 @app.route("/about/")
@@ -121,4 +122,15 @@ def profil():
     return render_template("profil.html",
         title="Profil",avatar=image_file,form=form)
    
+@app.route("/post/new", methods=["GET","POST"])
+@login_required
+def new_post():
+    form=PostForm()
+    if form.validate_on_submit():
+        post = Post(title=form.title.data, post=form.content.data, author=current_user)
+        db.session.add(post)
+        db.session.commit()
+        flash('Posted.', "success")
+        return redirect(url_for('home'))
+    return render_template('new_post.html', title="New post",form=form)
 

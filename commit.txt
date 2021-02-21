@@ -7,3 +7,4 @@ commit 006 : intro of flask_login
 commit 007 : route profil
 commit 007a : fixed bootstrap version
 commit 008 : added avatar handling (update). reisze and crop img
+commit 009 : route new_post, home changed to handle all post
